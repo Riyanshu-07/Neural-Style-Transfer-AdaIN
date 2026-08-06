@@ -1,0 +1,31 @@
+# Datasets and Archives
+test2017.zip
+test2017/
+train_3/
+experiment/
+
+# Temporary and Scratch Files
+onlyrandomfile.txt
+.DS_Store
+*.log
+
+# Uploaded Media in Web App (keep directory via .gitkeep)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Python / Environment Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+
+# IDE / Editor Folders
+.vscode/
+.idea/
+.project
+.settings/
