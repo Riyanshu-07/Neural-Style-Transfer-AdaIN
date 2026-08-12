@@ -1,914 +1,1421 @@
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AdaIN Style Transfer</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-<style>
-    body {
-        font-family: 'Inter', sans-serif;
-        background-color: #0f172a;
-        color: #e2e8f0;
-        background-image: 
-            linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)),
-            url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974&auto=format&fit=crop');
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-        min-height: 100vh;
-    }
-    .header-section {
-        padding: 5rem 0 3rem;
-        text-align: center;
-        position: relative;
-    }
-    .header-section h1 {
-        font-family: 'Orbitron', sans-serif;
-        font-weight: 700;
-        font-size: 3.5rem;
-        background: linear-gradient(to right, #818cf8, #c084fc, #f472b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 30px rgba(192, 132, 252, 0.3);
-        margin-bottom: 1rem;
-    }
-    .header-section .lead {
-        font-size: 1.25rem;
-        color: #94a3b8;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    .card {
-        background: rgba(30, 41, 59, 0.6);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        border-color: rgba(129, 140, 248, 0.3);
-    }
-    .card-header {
-        background: rgba(255, 255, 255, 0.05);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        color: #f8fafc;
-        font-family: 'Orbitron', sans-serif;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-    }
-    .preview-image {
-        width: 100%;
-        height: 300px;
-        object-fit: contain;
-        background-color: #0f172a;
-        border: 2px dashed #334155;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #64748b;
-        font-size: 1.2rem;
-        overflow: hidden;
-    }
-    .preview-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-        border: none;
-        padding: 15px 50px;
-        font-size: 1.2rem;
-        font-family: 'Orbitron', sans-serif;
-        border-radius: 50px;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        box-shadow: 0 10px 20px -10px rgba(168, 85, 247, 0.5);
-    }
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
-        box-shadow: 0 20px 30px -10px rgba(168, 85, 247, 0.6);
-    }
-    .btn-glow {
-        animation: glowing 2s infinite;
-    }
-    @keyframes glowing {
-        0% { box-shadow: 0 0 5px #a855f7; }
-        50% { box-shadow: 0 0 20px #a855f7, 0 0 10px #6366f1; }
-        100% { box-shadow: 0 0 5px #a855f7; }
-    }
-    /* Custom Range Slider */
-    .range-wrap {
-        position: relative;
-        margin: 2rem auto;
-        width: 100%;
-        max-width: 90%;
-    }
-    
-    #alphaRange {
-        -webkit-appearance: none;
-        width: 100%;
-        height: 12px;
-        background: rgba(30, 41, 59, 0.8);
-        border-radius: 15px;
-        outline: none;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
-        transition: background 0.1s;
-    }
-    
-    #alphaRange::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-        background: transparent;
-    }
-    
-    #alphaRange::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 24px;
-        width: 24px;
-        border-radius: 50%;
-        background: #fff;
-        cursor: pointer;
-        margin-top: -6px;
-        box-shadow: 0 0 10px #c084fc, 0 0 20px #818cf8;
-        border: 3px solid #1e293b;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    #alphaRange::-webkit-slider-thumb:hover {
-        box-shadow: 0 0 15px #c084fc, 0 0 30px #818cf8;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090b14">
+    <title>StyleForge AI — AdaIN Neural Style Transfer</title>
 
-    .range-value {
-        position: absolute;
-        top: -40px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 0.85rem;
-        box-shadow: 0 5px 15px rgba(168, 85, 247, 0.4);
-        opacity: 0;
-        transition: opacity 0.3s;
-        pointer-events: none;
-    }
-    .range-value::after {
-        content: '';
-        position: absolute;
-        bottom: -5px;
-        left: 50%;
-        margin-left: -5px;
-        border-width: 5px 5px 0;
-        border-style: solid;
-        border-color: #a855f7 transparent transparent transparent;
-    }
-    .range-wrap:hover .range-value {
-        opacity: 1;
-    }
-    .form-control {
-        background-color: #1e293b;
-        border: 1px solid #334155;
-        color: #f8fafc;
-    }
-    .form-control:focus {
-        background-color: #1e293b;
-        border-color: #818cf8;
-        color: #f8fafc;
-        box-shadow: 0 0 0 0.25rem rgba(129, 140, 248, 0.25);
-    }
-    .form-control::file-selector-button {
-        background-color: #334155;
-        color: #f8fafc;
-        border: none;
-        padding: 0.375rem 0.75rem;
-        margin-right: 0.75rem;
-        border-radius: 0.25rem;
-        transition: background-color 0.2s;
-    }
-    .form-control::file-selector-button:hover {
-        background-color: #475569;
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #0f172a; 
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 5px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #818cf8; 
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    /* Ambient Orbs */
-    .orb {
-        position: fixed;
-        border-radius: 50%;
-        filter: blur(100px);
-        z-index: 0;
-        opacity: 0.4;
-        animation: floatOrb 15s infinite ease-in-out alternate;
-        pointer-events: none;
-    }
-    .orb-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, #4f46e5, transparent 70%); }
-    .orb-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, #c084fc, transparent 70%); animation-delay: -5s; }
-    .orb-3 { top: 40%; left: 40%; width: 300px; height: 300px; background: radial-gradient(circle, #f472b6, transparent 70%); animation-delay: -10s; opacity: 0.2; }
-
-    @keyframes floatOrb {
-        0% { transform: translate(0, 0) scale(1); }
-        100% { transform: translate(50px, 50px) scale(1.1); }
-    }
-
-    /* Scanline Effect */
-    .scanlines {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-        background-size: 100% 4px;
-        z-index: 9998;
-        pointer-events: none;
-        opacity: 0.6;
-    }    
-
-    /* Background Canvas */
-    #neuralCanvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
-    }
-    .header-section, .container, .footer-section {
-        position: relative;
-        z-index: 1;
-    }    
-
-    /* Animations */
-    .fade-in-up {
-        animation: fadeInUp 0.8s ease-out forwards;
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    
-    @keyframes fadeInUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
+    <style>
+        :root {
+            --bg: #070911;
+            --bg-soft: #0c0f1a;
+            --panel: rgba(18, 22, 36, .72);
+            --panel-strong: rgba(21, 26, 43, .92);
+            --line: rgba(255,255,255,.09);
+            --line-bright: rgba(139,92,246,.35);
+            --text: #f5f7ff;
+            --muted: #98a1b7;
+            --purple: #8b5cf6;
+            --violet: #a855f7;
+            --pink: #ec4899;
+            --cyan: #22d3ee;
+            --green: #34d399;
+            --shadow: 0 30px 90px rgba(0,0,0,.38);
         }
-    }
 
-    /* Loader */
-    .loader-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.9);
-        backdrop-filter: blur(5px);
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease;
-    }
-    .loader-overlay.active {
-        opacity: 1;
-        pointer-events: all;
-    }
-    .cyber-spinner {
-        width: 80px;
-        height: 80px;
-        border: 4px solid transparent;
-        border-top: 4px solid #818cf8;
-        border-right: 4px solid #c084fc;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        box-shadow: 0 0 15px rgba(129, 140, 248, 0.5);
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+        * { box-sizing: border-box; }
 
-    /* Navbar Styles */
-    .navbar {
-        background: rgba(15, 23, 42, 0.8);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .navbar-brand {
-        font-family: 'Orbitron', sans-serif;
-        font-weight: 700;
-        font-size: 1.5rem;
-        background: linear-gradient(to right, #818cf8, #c084fc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .nav-link {
-        color: #e2e8f0 !important;
-        font-weight: 500;
-        margin-left: 1rem;
-        transition: color 0.3s;
-        position: relative;
-    }
-    .nav-link:hover {
-        color: #818cf8 !important;
-    }
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: 0;
-        left: 0;
-        background-color: #818cf8;
-        transition: width 0.3s;
-    }
-    .nav-link:hover::after {
-        width: 100%;
-    }
+        html { scroll-behavior: smooth; }
 
-    /* Footer Styles */
-    .footer-section {
-        background: rgba(15, 23, 42, 0.95);
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 4rem 0 2rem;
-        margin-top: 5rem;
-        color: #94a3b8;
-    }
-    .footer-section h5 {
-        color: #f8fafc;
-        font-family: 'Orbitron', sans-serif;
-        margin-bottom: 1.5rem;
-        font-size: 1.1rem;
-    }
-    .footer-link {
-        color: #94a3b8;
-        text-decoration: none;
-        transition: color 0.3s;
-        display: block;
-        margin-bottom: 0.8rem;
-    }
-    .footer-link:hover {
-        color: #818cf8;
-    }
-    .social-icon {
-        width: 40px;
-        height: 40px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255,255,255,0.05);
-        border-radius: 50%;
-        color: #f8fafc;
-        margin-right: 10px;
-        transition: all 0.3s;
-        text-decoration: none;
-    }
-    .social-icon:hover {
-        background: #818cf8;
-        color: white;
-    }
-    .examples-section {
-        margin-top: 4rem;
-    }
-    .examples-section .example-image {
-        width: 100%;
-        height: 220px;
-        object-fit: contain;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(15, 23, 42, 0.8);
-    }
-    .examples-section .example-role {
-        font-size: 0.82rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        color: #cbd5e1;
-        margin-bottom: 0.45rem;
-        text-transform: uppercase;
-    }
-    .examples-section .tree-connector {
-        color: #a5b4fc;
-        font-size: 1.15rem;
-        font-weight: 600;
-        text-align: center;
-        letter-spacing: 0.04em;
-        margin: 0.2rem 0 0.4rem;
-    }
-    .examples-section .example-flow {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        padding: 1.25rem;
-        border-radius: 18px;
-        background: rgba(15, 23, 42, 0.45);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .examples-section .example-inputs {
-        flex: 1;
-        display: grid;
-        gap: 1rem;
-    }
-    .examples-section .example-output {
-        flex: 1;
-    }
-    .examples-section .example-arrow {
-        color: #a5b4fc;
-        font-size: 1.75rem;
-        font-weight: 700;
-        line-height: 1;
-    }
-    @media (max-width: 767.98px) {
-        .examples-section .example-flow {
-            flex-direction: column;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: "DM Sans", sans-serif;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(139,92,246,.16), transparent 28%),
+                radial-gradient(circle at 88% 22%, rgba(34,211,238,.10), transparent 25%),
+                radial-gradient(circle at 60% 90%, rgba(236,72,153,.10), transparent 28%),
+                var(--bg);
+            overflow-x: hidden;
         }
-        .examples-section .example-arrow {
-            transform: rotate(90deg);
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .35;
+            background-image:
+                linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: linear-gradient(to bottom, black, transparent 80%);
         }
-    }
-    .faq-section {
-        margin-top: 4rem;
-    }
-    .faq-section .accordion-item {
-        background: rgba(30, 41, 59, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        margin-bottom: 0.75rem;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-    .faq-section .accordion-button {
-        background: rgba(15, 23, 42, 0.75);
-        color: #e2e8f0;
-        font-weight: 600;
-    }
-    .faq-section .accordion-button:not(.collapsed) {
-        background: rgba(129, 140, 248, 0.2);
-        color: #f8fafc;
-        box-shadow: none;
-    }
-    .faq-section .accordion-button:focus {
-        box-shadow: 0 0 0 0.2rem rgba(129, 140, 248, 0.2);
-    }
-    .faq-section .accordion-body {
-        color: #94a3b8;
-    }
-</style>
+
+        a { color: inherit; text-decoration: none; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+            background: rgba(7,9,17,.76);
+            backdrop-filter: blur(22px);
+        }
+
+        .nav {
+            width: min(1160px, calc(100% - 40px));
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            letter-spacing: -.03em;
+            font-size: 1.12rem;
+        }
+
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(139,92,246,.32), rgba(34,211,238,.12));
+            box-shadow: 0 0 25px rgba(139,92,246,.18);
+        }
+
+        .brand-mark svg { width: 19px; }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        .nav-links a:hover { color: #fff; }
+
+        .nav-badge {
+            padding: 8px 13px;
+            border-radius: 999px;
+            border: 1px solid rgba(139,92,246,.35);
+            background: rgba(139,92,246,.10);
+            color: #d9ccff;
+            font-size: .78rem;
+        }
+
+        .hero {
+            width: min(1160px, calc(100% - 40px));
+            margin: auto;
+            padding: 92px 0 55px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border: 1px solid rgba(139,92,246,.3);
+            border-radius: 999px;
+            color: #d8ccff;
+            background: rgba(139,92,246,.08);
+            font-size: .78rem;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green);
+        }
+
+        h1 {
+            margin: 22px auto 15px;
+            max-width: 900px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(3rem, 7vw, 6rem);
+            line-height: .94;
+            letter-spacing: -.065em;
+        }
+
+        h1 span {
+            background: linear-gradient(100deg, #fff 10%, #c4b5fd 48%, #67e8f9 90%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-copy {
+            max-width: 650px;
+            margin: auto;
+            color: var(--muted);
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+
+        .hero-pills {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .pill {
+            padding: 7px 11px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: #c7cede;
+            background: rgba(255,255,255,.035);
+            font-size: .78rem;
+        }
+
+        .workspace {
+            width: min(1160px, calc(100% - 40px));
+            margin: auto;
+        }
+
+        .glass {
+            border: 1px solid var(--line);
+            border-radius: 26px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(24px);
+        }
+
+        .workspace-head {
+            padding: 23px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .workspace-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .workspace-subtitle {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: .83rem;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #a7f3d0;
+            font-size: .78rem;
+        }
+
+        .status i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        .workspace-body { padding: 25px; }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .upload-card {
+            position: relative;
+            min-width: 0;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: rgba(255,255,255,.025);
+            transition: .25s ease;
+        }
+
+        .upload-card:hover {
+            border-color: var(--line-bright);
+            transform: translateY(-2px);
+        }
+
+        .upload-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 13px;
+        }
+
+        .upload-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 600;
+        }
+
+        .icon-box {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: rgba(139,92,246,.12);
+            border: 1px solid rgba(139,92,246,.2);
+            color: #c4b5fd;
+        }
+
+        .upload-label {
+            color: var(--muted);
+            font-size: .75rem;
+        }
+
+        .preview {
+            position: relative;
+            height: 350px;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            border: 1px dashed rgba(255,255,255,.13);
+            border-radius: 15px;
+            background:
+                linear-gradient(135deg, rgba(139,92,246,.045), rgba(34,211,238,.025)),
+                #0a0d16;
+        }
+
+        .preview::after {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border: 1px solid rgba(255,255,255,.035);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 2;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: #68738a;
+            z-index: 1;
+        }
+
+        .placeholder svg {
+            width: 42px;
+            margin-bottom: 10px;
+            opacity: .7;
+        }
+
+        .placeholder strong {
+            display: block;
+            color: #9ba5b9;
+            font-size: .9rem;
+            margin-bottom: 5px;
+        }
+
+        .placeholder span { font-size: .76rem; }
+
+        .file-input {
+            margin-top: 13px;
+            width: 100%;
+            padding: 11px;
+            color: #aab3c5;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: #0d111d;
+            font: inherit;
+            font-size: .82rem;
+        }
+
+        .file-input::file-selector-button {
+            margin-right: 10px;
+            padding: 8px 12px;
+            border: 0;
+            border-radius: 8px;
+            background: #252b3b;
+            color: #eef1f8;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-top: 18px;
+            padding: 23px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .control-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+
+        .control-name {
+            font-weight: 600;
+        }
+
+        .control-description {
+            color: var(--muted);
+            font-size: .78rem;
+            margin-top: 4px;
+        }
+
+        .value {
+            min-width: 54px;
+            padding: 7px 10px;
+            border: 1px solid rgba(139,92,246,.3);
+            border-radius: 9px;
+            color: #ddd6fe;
+            background: rgba(139,92,246,.1);
+            text-align: center;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 600;
+        }
+
+        .range {
+            width: 100%;
+            accent-color: var(--purple);
+            cursor: pointer;
+        }
+
+        .range-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 7px;
+            color: #677187;
+            font-size: .72rem;
+        }
+
+        .action-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .submit-btn {
+            position: relative;
+            min-width: 280px;
+            padding: 15px 26px;
+            border: 0;
+            border-radius: 13px;
+            color: white;
+            background: linear-gradient(110deg, #7c3aed, #a855f7 55%, #ec4899);
+            box-shadow: 0 14px 35px rgba(139,92,246,.25);
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 600;
+            letter-spacing: .02em;
+            cursor: pointer;
+            transition: .25s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 45px rgba(139,92,246,.35);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        .result {
+            margin-top: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(52,211,153,.2);
+            border-radius: 22px;
+            background: rgba(52,211,153,.025);
+        }
+
+        .result-head {
+            padding: 17px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(52,211,153,.12);
+        }
+
+        .result-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 600;
+        }
+
+        .check {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(52,211,153,.12);
+            color: var(--green);
+        }
+
+        .result img {
+            display: block;
+            width: 100%;
+            max-height: 720px;
+            object-fit: contain;
+            background: #070911;
+        }
+
+        .download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 17px auto 20px;
+            padding: 10px 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(255,255,255,.045);
+            color: #dce1ed;
+            font-size: .82rem;
+        }
+
+        .download:hover { background: rgba(255,255,255,.08); }
+
+        .alert {
+            margin-top: 18px;
+            padding: 13px 16px;
+            border: 1px solid rgba(248,113,113,.25);
+            border-radius: 12px;
+            background: rgba(239,68,68,.08);
+            color: #fecaca;
+            font-size: .84rem;
+        }
+
+        .section {
+            width: min(1160px, calc(100% - 40px));
+            margin: 90px auto 0;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-heading h2 {
+            margin: 0 0 9px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(1.9rem, 4vw, 2.7rem);
+            letter-spacing: -.045em;
+        }
+
+        .section-heading p {
+            max-width: 600px;
+            margin: auto;
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: .9rem;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .example {
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--panel);
+        }
+
+        .example-flow {
+            display: grid;
+            grid-template-columns: 1fr 38px 1fr;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .example-inputs {
+            display: grid;
+            gap: 10px;
+        }
+
+        .example-label {
+            margin-bottom: 7px;
+            color: var(--muted);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .example img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 11px;
+            border: 1px solid var(--line);
+            background: #080b13;
+        }
+
+        .arrow {
+            text-align: center;
+            color: #a78bfa;
+            font-size: 1.4rem;
+        }
+
+        .example-output img { height: 370px; }
+
+        .faq {
+            display: grid;
+            gap: 10px;
+        }
+
+        details {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255,255,255,.025);
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 17px 19px;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none;
+        }
+
+        summary::-webkit-details-marker { display: none; }
+
+        summary::after {
+            content: "+";
+            float: right;
+            color: #a78bfa;
+            font-size: 1.1rem;
+        }
+
+        details[open] summary::after { content: "−"; }
+
+        details p {
+            margin: 0;
+            padding: 0 19px 18px;
+            color: var(--muted);
+            line-height: 1.65;
+            font-size: .86rem;
+        }
+
+        .footer {
+            width: min(1160px, calc(100% - 40px));
+            margin: 95px auto 0;
+            padding: 28px 0 35px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            color: #68738a;
+            font-size: .78rem;
+        }
+
+        .footer strong { color: #aeb6c7; }
+
+        .loader {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            place-items: center;
+            background: rgba(5,7,13,.86);
+            backdrop-filter: blur(12px);
+        }
+
+        .loader.active { display: grid; }
+
+        .loader-card {
+            width: min(390px, calc(100% - 40px));
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--line-bright);
+            border-radius: 22px;
+            background: var(--panel-strong);
+            box-shadow: var(--shadow);
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 18px;
+            border: 3px solid rgba(255,255,255,.1);
+            border-top-color: var(--purple);
+            border-right-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        .loader h3 {
+            margin: 0 0 7px;
+            font-family: "Space Grotesk", sans-serif;
+        }
+
+        .loader p {
+            margin: 0;
+            color: var(--muted);
+            font-size: .82rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 820px) {
+            .nav-links a { display: none; }
+            .hero { padding-top: 65px; }
+            .upload-grid,
+            .example-grid { grid-template-columns: 1fr; }
+            .preview { height: 280px; }
+            .workspace-body { padding: 16px; }
+            .workspace-head { padding: 18px; }
+            .example-flow { grid-template-columns: 1fr; }
+            .arrow { transform: rotate(90deg); }
+            .example-output img { height: 250px; }
+        }
+
+        @media (max-width: 520px) {
+            .nav, .hero, .workspace, .section, .footer {
+                width: min(100% - 24px, 1160px);
+            }
+
+            h1 { font-size: 3rem; }
+
+            .hero-copy { font-size: .95rem; }
+
+            .status { display: none; }
+
+            .workspace-head {
+                display: block;
+            }
+
+            .submit-btn { width: 100%; min-width: 0; }
+
+            .footer {
+                display: block;
+            }
+
+            .footer > * + * { margin-top: 8px; }
+        }
+    
+        /* ---------- Engagement layer ---------- */
+
+        .hero {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .hero-orbit {
+            position: absolute;
+            width: 430px;
+            height: 430px;
+            left: 50%;
+            top: 36px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: -1;
+            opacity: .7;
+        }
+
+        .orbit-ring {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(139,92,246,.09);
+            border-radius: 50%;
+            animation: orbitPulse 5s ease-in-out infinite;
+        }
+
+        .ring-2 {
+            inset: 55px;
+            border-color: rgba(34,211,238,.07);
+            animation-delay: -2s;
+        }
+
+        .orbit-dot {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #a78bfa;
+            box-shadow: 0 0 18px rgba(167,139,250,.9);
+            animation: floatDot 4s ease-in-out infinite;
+        }
+
+        .orbit-dot-1 { top: 40px; left: 95px; }
+        .orbit-dot-2 {
+            right: 53px;
+            top: 185px;
+            background: #67e8f9;
+            box-shadow: 0 0 18px rgba(103,232,249,.9);
+            animation-delay: -1.2s;
+        }
+        .orbit-dot-3 {
+            bottom: 62px;
+            left: 120px;
+            background: #f0abfc;
+            box-shadow: 0 0 18px rgba(240,171,252,.9);
+            animation-delay: -2.4s;
+        }
+
+        .mini-eyebrow {
+            margin-bottom: 10px;
+            color: #a78bfa;
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+        }
+
+        .blend-hint {
+            min-height: 24px;
+            margin-top: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            color: #7f8aa1;
+            font-size: .74rem;
+        }
+
+        .hint-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 9px var(--green);
+        }
+
+        .upload-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: linear-gradient(
+                135deg,
+                rgba(139,92,246,.06),
+                transparent 35%,
+                rgba(34,211,238,.035)
+            );
+            pointer-events: none;
+        }
+
+        .upload-card {
+            overflow: hidden;
+        }
+
+        .preview {
+            transition: border-color .25s ease, box-shadow .25s ease;
+        }
+
+        .preview.dragging {
+            border-color: #a78bfa;
+            box-shadow: inset 0 0 30px rgba(139,92,246,.1);
+        }
+
+        .submit-btn::after {
+            content: "→";
+            margin-left: 10px;
+            transition: transform .2s ease;
+        }
+
+        .submit-btn:hover::after {
+            display: inline-block;
+            transform: translateX(4px);
+        }
+
+        .result {
+            animation: resultIn .55s cubic-bezier(.2,.8,.2,1);
+        }
+
+        .result img {
+            transition: transform .45s ease;
+        }
+
+        .result:hover img {
+            transform: scale(1.008);
+        }
+
+        .example {
+            transition: transform .25s ease, border-color .25s ease;
+        }
+
+        .example:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139,92,246,.25);
+        }
+
+        details {
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        details:hover {
+            border-color: rgba(139,92,246,.2);
+        }
+
+        @keyframes orbitPulse {
+            0%, 100% { transform: scale(.96); opacity: .45; }
+            50% { transform: scale(1.03); opacity: 1; }
+        }
+
+        @keyframes floatDot {
+            0%, 100% { transform: translate3d(0,0,0); }
+            50% { transform: translate3d(8px,-10px,0); }
+        }
+
+        @keyframes resultIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(.985);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+    </style>
 </head>
+
 <body>
 
-<canvas id="neuralCanvas"></canvas>
-<div class="scanlines"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
+<header class="topbar">
+    <nav class="nav">
+        <a class="brand" href="#">
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="M9.5 4.2A3.2 3.2 0 0 0 6 7.4c0 .3 0 .6.1.9A3.8 3.8 0 0 0 4 11.8a3.8 3.8 0 0 0 2.2 3.4A3.4 3.4 0 0 0 9.5 19c.8 0 1.6-.3 2.2-.8.6.5 1.4.8 2.3.8a3.4 3.4 0 0 0 3.3-3.8 3.8 3.8 0 0 0 2.2-3.4 3.8 3.8 0 0 0-2.1-3.5c.1-.3.1-.6.1-.9a3.2 3.2 0 0 0-3.5-3.2A3.4 3.4 0 0 0 12 3.5a3.4 3.4 0 0 0-2.5.7Z"/>
+                    <path d="M12 7v10M8.5 9.5l3.5 2 3.5-2M8.5 14.5l3.5-2 3.5 2"/>
+                </svg>
+            </span>
+            StyleForge AI
+        </a>
 
-<nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-        <a class="navbar-brand" href="#"><i class="fas fa-brain me-2"></i>NeuralArt</a>
-        <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Gallery</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Features</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Pricing</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
-            </ul>
-            <a href="#" class="btn btn-sm btn-outline-light ms-3 rounded-pill px-4">Sign In</a>
+        <div class="nav-links">
+            <a href="#workspace">Studio</a>
+            <a href="#examples">Examples</a>
+            <a href="#faq">FAQ</a>
+            <span class="nav-badge">AdaIN • PyTorch</span>
         </div>
+    </nav>
+</header>
+
+<main>
+
+    <section class="hero">
+        <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            Neural style transfer
+        </div>
+
+        <h1>Turn images into<br><span>living artwork.</span></h1>
+
+        <p class="hero-copy">
+            Blend the structure of your content image with the visual language
+            of any style reference using Adaptive Instance Normalization.
+        </p>
+
+        <div class="hero-orbit" aria-hidden="true">
+        <span class="orbit-dot orbit-dot-1"></span>
+        <span class="orbit-dot orbit-dot-2"></span>
+        <span class="orbit-dot orbit-dot-3"></span>
+        <span class="orbit-ring ring-1"></span>
+        <span class="orbit-ring ring-2"></span>
     </div>
-</nav>
 
-<div class="header-section">
-    <div class="container">
-        <h1 class="display-4 fw-bold">STYLEFORGE AI</h1>
-        <p class="lead" style="border-right: 2px solid rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; width: 0; animation: typing 3.5s steps(40, end) forwards, blink-caret .75s step-end infinite; margin: 0 auto; display: inline-block; text-align: left;">Redefine Reality with AI-Powered Artistry</p>
-    </div>
-</div>
+    <div class="hero-pills">
+            <span class="pill">VGG-19 Encoder</span>
+            <span class="pill">AdaIN</span>
+            <span class="pill">Pretrained Decoder</span>
+            <span class="pill">CPU Inference</span>
+        </div>
+    </section>
 
-<div class="container mb-5 fade-in-up">
-    <form method="post" enctype="multipart/form-data" id="uploadForm">
-        {{ form.hidden_tag() }}
-        
-        <div class="row g-4">
-            <!-- Content Image Section -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header text-center py-3">Content Source</div>
-                    <div class="card-body text-center">
-                        <div class="preview-image mb-3" id="contentPreview">
-                            {% if content_image %}
-                                <img src="{{ url_for('send_image', filename=content_image) }}" alt="Content Image">
-                            {% else %}
-                                <span>Select Content Image</span>
-                            {% endif %}
-                        </div>
-                        {{ form.content(class="form-control", onchange="previewFile(this, 'contentPreview')") }}
-                    </div>
+    <section class="workspace" id="workspace">
+        <div class="glass">
+
+            <div class="workspace-head">
+                <div>
+                    <div class="workspace-title">Create your transformation</div>
+                    <div class="workspace-subtitle">Two images in. One completely new visual identity out.</div>
+                </div>
+
+                <div class="status">
+                    <i></i>
+                    Model ready
                 </div>
             </div>
 
-            <!-- Style Image Section -->
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header text-center py-3">Style Reference</div>
-                    <div class="card-body text-center">
-                        <div class="preview-image mb-3" id="stylePreview">
-                            {% if style_image %}
-                                <img src="{{ url_for('send_image', filename=style_image) }}" alt="Style Image">
-                            {% else %}
-                                <span>Select Style Image</span>
-                            {% endif %}
-                        </div>
-                        {{ form.style(class="form-control", onchange="previewFile(this, 'stylePreview')") }}
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="workspace-body">
 
-        <!-- Controls Section -->
-        <div class="row justify-content-center mt-4">
-            <div class="col-md-8">
-                <div class="range-wrap">
-                    <label for="alpha" class="form-label fw-bold mb-3 d-block text-center" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; color: #a855f7;">STYLE STRENGTH</label>
-                    <div class="position-relative">
-                        <div class="range-value" id="rangeValue">1.0</div>
-                        {{ form.alpha(class="form-control-range", id="alphaRange", type="range", min="0", max="1", step="0.1") }}
-                    </div>
-                </div>
-                <div class="text-center mt-5">
-                    {{ form.submit(class="btn btn-primary shadow-lg btn-glow") }}
-                </div>
-            </div>
-        </div>
-    </form>
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {{ form.hidden_tag() }}
 
-    {% if result_image %}
-    <div class="row justify-content-center mt-5" id="resultSection">
-        <div class="col-md-8">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white fw-bold text-center py-3" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Stylized Result</div>
-                <div class="card-body p-0">
-                    <img src="{{ url_for('send_image', filename=result_image) }}" class="img-fluid w-100" alt="Stylized Image" style="border-radius: 0 0 20px 20px;">
-                </div>
-                <div class="card-footer text-center" style="background: transparent; border-top: none; padding-bottom: 20px;">
-                    <a href="{{ url_for('send_image', filename=result_image) }}" download class="btn btn-outline-light mt-2">Download Result</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+                    <div class="upload-grid">
 
-    {% if error %}
-        <div class="alert alert-danger mt-4 text-center" role="alert" style="background: rgba(220, 38, 38, 0.2); border-color: #dc2626; color: #fecaca;">
-            <strong>Error:</strong> {{ error }}
-        </div>
-    {% endif %}
-</div>
-
-<section class="container examples-section fade-in-up">
-    <div class="card">
-        <div class="card-header text-center py-3">Examples</div>
-        <div class="card-body">
-            <p class="text-center text-muted mb-4">Each example shows the content image, the style below it, and the final output beside them.</p>
-            <div class="row g-4">
-                <div class="col-12">
-                    <div class="example-flow">
-                        <div class="example-inputs">
-                            <div>
-                                <div class="example-role text-center">Content Image</div>
-                                <img src="{{ url_for('send_example', filename='brad_pitt.jpg') }}" alt="Brad Pitt Content" class="example-image">
+                        <!-- CONTENT -->
+                        <div class="upload-card">
+                            <div class="upload-top">
+                                <div class="upload-title">
+                                    <span class="icon-box">
+                                        <svg width="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                            <circle cx="8.5" cy="9" r="1.5"/>
+                                            <path d="m21 15-4.5-4.5L8 19"/>
+                                        </svg>
+                                    </span>
+                                    Content image
+                                </div>
+                                <span class="upload-label">YOUR IMAGE</span>
                             </div>
-                            <div>
-                                <div class="example-role text-center">Style Image</div>
-                                <img src="{{ url_for('send_example', filename='sketch.png') }}" alt="Sketch Style" class="example-image">
-                            </div>
-                        </div>
-                        <div class="example-arrow">-&gt;</div>
-                        <div class="example-output">
-                            <div class="example-role text-center">Output</div>
-                            <img src="{{ url_for('send_example', filename='stylized_brad_pitt.jpg') }}" alt="Brad Pitt Sketch Result" class="example-image">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <div class="example-flow">
-                        <div class="example-inputs">
-                            <div>
-                                <div class="example-role text-center">Content Image</div>
-                                <img src="{{ url_for('send_example', filename='brad_pitt.jpg') }}" alt="Brad Pitt Content" class="example-image">
-                            </div>
-                            <div>
-                                <div class="example-role text-center">Style Image</div>
-                                <img src="{{ url_for('send_example', filename='picasso_seated_nude_hr.jpg') }}" alt="Picasso Seated Nude Style" class="example-image">
-                            </div>
-                        </div>
-                        <div class="example-arrow">-&gt;</div>
-                        <div class="example-output">
-                            <div class="example-role text-center">Output</div>
-                            <img src="{{ url_for('send_example', filename='stylized_brad_pitt (1).jpg') }}" alt="Brad Pitt Picasso Result" class="example-image">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<section class="container faq-section fade-in-up">
-    <div class="card">
-        <div class="card-header text-center py-3">FAQs</div>
-        <div class="card-body">
-            <div class="accordion" id="faqAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="faqHeadingOne">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne" aria-expanded="false" aria-controls="faqOne">
-                            1. Is it a pretrained model?
-                        </button>
-                    </h2>
-                    <div id="faqOne" class="accordion-collapse collapse" aria-labelledby="faqHeadingOne" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            No, we train a model ourselves.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="faqHeadingTwo">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo" aria-expanded="false" aria-controls="faqTwo">
-                            2. Is it a free platform?
-                        </button>
-                    </h2>
-                    <div id="faqTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            This demo is currently available as a free experience.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="faqHeadingThree">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThree" aria-expanded="false" aria-controls="faqThree">
-                            3. Which styles of painting can be used?
-                        </button>
-                    </h2>
-                    <div id="faqThree" class="accordion-collapse collapse" aria-labelledby="faqHeadingThree" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            You can use almost any painting style image (impressionist, abstract, cubist, watercolor, sketch, and more) as the style reference.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="faqHeadingFour">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqFour" aria-expanded="false" aria-controls="faqFour">
-                            4. Tech stack of the project?
-                        </button>
-                    </h2>
-                    <div id="faqFour" class="accordion-collapse collapse" aria-labelledby="faqHeadingFour" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            Python, PyTorch, Flask.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="faqHeadingFive">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqFive" aria-expanded="false" aria-controls="faqFive">
-                            5. Which dataset / how big data?
-                        </button>
-                    </h2>
-                    <div id="faqFive" class="accordion-collapse collapse" aria-labelledby="faqHeadingFive" data-bs-parent="#faqAccordion">
-                        <div class="accordion-body">
-                            The model is trained on large-scale image datasets.
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+                            <div class="preview" id="contentPreview">
+                                {% if content_image %}
+                                    <img src="{{ url_for('send_image', filename=content_image) }}" alt="Content image">
+                                {% else %}
+                                    <div class="placeholder">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                            <path d="m21 15-4-4-8 8"/>
+                                        </svg>
+                                        <strong>Upload your content</strong>
+                                        <span>Portrait, landscape, photo or artwork</span>
+                                    </div>
+                                {% endif %}
+                            </div>
 
-<footer class="footer-section">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
-                <h5><i class="fas fa-brain me-2"></i>NeuralArt</h5>
-                <p class="mb-4">"Every artist dips his brush in his own soul, and paints his own nature into his pictures."</p>
-                <p class="small text-muted">Empowering creators with state-of-the-art AI tools to reimagine reality through the lens of artistic expression.</p>
-            </div>
-            <div class="col-lg-2 col-md-6">
-                <h5>Quick Links</h5>
-                <a href="#" class="footer-link">Home</a>
-                <a href="#" class="footer-link">About Us</a>
-                <a href="#" class="footer-link">Showcase</a>
-                <a href="#" class="footer-link">API Docs</a>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <h5>Contact Us</h5>
-                <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Innovation Dr, Tech City</p>
-                <p class="mb-2"><i class="fas fa-envelope me-2"></i> hello@neuralart.ai</p>
-                <p class="mb-2"><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</p>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <h5>Follow Us</h5>
-                <div class="d-flex mb-3">
-                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                            {{ form.content(
+                                class="file-input",
+                                onchange="previewFile(this, 'contentPreview')"
+                            ) }}
+                        </div>
+
+                        <!-- STYLE -->
+                        <div class="upload-card">
+                            <div class="upload-top">
+                                <div class="upload-title">
+                                    <span class="icon-box">
+                                        <svg width="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M12 3v18M3 12h18"/>
+                                            <circle cx="12" cy="12" r="8.5"/>
+                                            <path d="m7 7 10 10M17 7 7 17"/>
+                                        </svg>
+                                    </span>
+                                    Style reference
+                                </div>
+                                <span class="upload-label">ART STYLE</span>
+                            </div>
+
+                            <div class="preview" id="stylePreview">
+                                {% if style_image %}
+                                    <img src="{{ url_for('send_image', filename=style_image) }}" alt="Style image">
+                                {% else %}
+                                    <div class="placeholder">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                                            <path d="M4 20 15.5 8.5a2.8 2.8 0 0 1 4 0l.5.5"/>
+                                            <path d="M7 20h13"/>
+                                            <circle cx="8" cy="7" r="2"/>
+                                            <path d="m3 17 4-4 3 3"/>
+                                        </svg>
+                                        <strong>Choose a style</strong>
+                                        <span>Painting, sketch, abstract art and more</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            {{ form.style(
+                                class="file-input",
+                                onchange="previewFile(this, 'stylePreview')"
+                            ) }}
+                        </div>
+
+                    </div>
+
+                    <!-- CONTROLS -->
+                    <div class="controls">
+                        <div class="control-head">
+                            <div>
+                                <div class="control-name">How much of the style?</div>
+                                <div class="control-description">
+                                    Slide to blend structure and style exactly how you want it.
+                                </div>
+                            </div>
+
+                            <div class="value" id="rangeValue">1.0</div>
+                        </div>
+
+                        {{ form.alpha(
+                            class="range",
+                            id="alphaRange",
+                            type="range",
+                            min="0",
+                            max="1",
+                            step="0.1"
+                        ) }}
+
+                        <div class="range-scale">
+                            <span>Content</span>
+                            <span>Balanced</span>
+                            <span>Full style</span>
+                        </div>
+
+                        <div class="blend-hint">
+                            <span class="hint-dot"></span>
+                            <span id="blendHint">Ready to transform</span>
+                        </div>
+
+                        <div class="action-row">
+                            {{ form.submit(
+                                class="submit-btn",
+                                value="Generate artwork"
+                            ) }}
+                        </div>
+                    </div>
+
+                </form>
+
+                {% if result_image %}
+                <div class="result" id="resultSection">
+                    <div class="result-head">
+                        <div class="result-title">
+                            <span class="check">✓</span>
+                            Your artwork is ready
+                        </div>
+                        <span class="upload-label">ADA INFERENCE COMPLETE</span>
+                    </div>
+
+                    <img src="{{ url_for('send_image', filename=result_image) }}" alt="Stylized result">
+
+                    <div style="text-align:center;">
+                        <a class="download"
+                           href="{{ url_for('send_image', filename=result_image) }}"
+                           download>
+                            ↓ Download result
+                        </a>
+                    </div>
                 </div>
-                <p class="small text-muted">Subscribe to our newsletter for the latest updates.</p>
+                {% endif %}
+
+                {% if error %}
+                <div class="alert" role="alert">
+                    <strong>Something went wrong:</strong> {{ error }}
+                </div>
+                {% endif %}
+
             </div>
         </div>
-        <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-        <div class="text-center text-muted small">
-            &copy; 2025 NeuralArt Inc. All rights reserved. | Privacy Policy | Terms of Service
+    </section>
+
+    <!-- EXAMPLES -->
+    <section class="section" id="examples">
+        <div class="section-heading">
+            <div class="mini-eyebrow">FROM INPUT → TRANSFORMATION</div>
+            <h2>See what AdaIN can do</h2>
+            <p>
+                The content image provides structure while the style image
+                supplies the visual statistics used for transformation.
+            </p>
         </div>
-    </div>
+
+        <div class="example-grid">
+
+            <article class="example">
+                <div class="example-flow">
+                    <div class="example-inputs">
+                        <div>
+                            <div class="example-label">Content</div>
+                            <img src="{{ url_for('send_example', filename='brad_pitt.jpg') }}" alt="Brad Pitt content">
+                        </div>
+                        <div>
+                            <div class="example-label">Style</div>
+                            <img src="{{ url_for('send_example', filename='sketch.png') }}" alt="Sketch style">
+                        </div>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="example-output">
+                        <div class="example-label">Result</div>
+                        <img src="{{ url_for('send_example', filename='stylized_brad_pitt.jpg') }}" alt="Brad Pitt sketch result">
+                    </div>
+                </div>
+            </article>
+
+            <article class="example">
+                <div class="example-flow">
+                    <div class="example-inputs">
+                        <div>
+                            <div class="example-label">Content</div>
+                            <img src="{{ url_for('send_example', filename='brad_pitt.jpg') }}" alt="Brad Pitt content">
+                        </div>
+                        <div>
+                            <div class="example-label">Style</div>
+                            <img src="{{ url_for('send_example', filename='picasso_seated_nude_hr.jpg') }}" alt="Picasso style">
+                        </div>
+                    </div>
+
+                    <div class="arrow">→</div>
+
+                    <div class="example-output">
+                        <div class="example-label">Result</div>
+                        <img src="{{ url_for('send_example', filename='stylized_brad_pitt (1).jpg') }}" alt="Brad Pitt Picasso result">
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+        <div class="section-heading">
+            <div class="mini-eyebrow">THE ENGINE</div>
+            <h2>What's happening underneath?</h2>
+            <p>A quick look at what powers this neural style transfer demo.</p>
+        </div>
+
+        <div class="faq">
+
+            <details>
+                <summary>Is this using a pretrained model?</summary>
+                <p>
+                    Yes. The application uses pretrained VGG-19 features together
+                    with a pretrained AdaIN decoder for image-to-image style transfer.
+                </p>
+            </details>
+
+            <details>
+                <summary>What is AdaIN?</summary>
+                <p>
+                    Adaptive Instance Normalization aligns the channel-wise feature
+                    statistics of the content representation with those of the style
+                    representation before decoding the result.
+                </p>
+            </details>
+
+            <details>
+                <summary>What kind of style images can I use?</summary>
+                <p>
+                    You can experiment with paintings, sketches, illustrations,
+                    abstract artwork, textures and many other visually distinctive
+                    images.
+                </p>
+            </details>
+
+            <details>
+                <summary>What technology powers the application?</summary>
+                <p>
+                    The project uses Python, Flask and PyTorch, with a VGG encoder,
+                    AdaIN feature transformation and a pretrained decoder.
+                </p>
+            </details>
+
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div><strong>StyleForge AI</strong> · Neural Style Transfer with AdaIN</div>
+    <div>Built with Python · PyTorch · Flask</div>
 </footer>
 
-<!-- Loading Overlay -->
-<div class="loader-overlay" id="loader">
-    <div class="cyber-spinner mb-4"></div>
-    <h3 class="text-white" style="font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">PROCESSING</h3>
-    <p class="text-muted">Neural Network is dreaming...</p>
+<!-- LOADING -->
+<div class="loader" id="loader">
+    <div class="loader-card">
+        <div class="spinner"></div>
+        <h3>Creating your artwork</h3>
+        <p>Encoding content and style, applying AdaIN, and decoding the result…</p>
+    </div>
 </div>
 
-<style>
-    /* Typing Animation Keyframes */
-    @keyframes typing {
-        from { width: 0 }
-        to { width: 100% }
-    }
-    @keyframes blink-caret {
-        from, to { border-color: transparent }
-        50% { border-color: rgba(255,255,255,0.75); }
-    }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function previewFile(input, previewId) {
         const preview = document.getElementById(previewId);
-        const file = input.files[0];
+        const file = input.files && input.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            return;
+        }
+
         const reader = new FileReader();
 
-        reader.addEventListener("load", function () {
-            // Convert image file to base64 string
-            preview.innerHTML = `<img src="${reader.result}" alt="Image Preview">`;
-        }, false);
+        reader.onload = function(event) {
+            preview.innerHTML =
+                `<img src="${event.target.result}" alt="Selected image">`;
+        };
 
-        if (file) {
-            reader.readAsDataURL(file);
-        }
+        reader.readAsDataURL(file);
     }
 
-    // Restore previews if page reloads with data (optional enhancement)
-    window.onload = function() {
-        if(document.getElementById('resultSection')) {
-            document.getElementById('resultSection').scrollIntoView({behavior: "smooth"});
-        }
-        // Neural Network Background Animation
-        const canvas = document.getElementById('neuralCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let particles = [];
-        let mouse = { x: null, y: null, radius: 150 };
+    document.addEventListener("DOMContentLoaded", function() {
 
-
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 3 + 1.5;
-                // Assign one of 10 colors to group nodes
-                this.hue = Math.floor(Math.random() * 10) * 36;
-                this.density = (Math.random() * 30) + 1;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Mouse interaction
-                if (mouse.x != null) {
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < mouse.radius) {
-                        const forceDirectionX = dx / distance;
-                        const forceDirectionY = dy / distance;
-                        const force = (mouse.radius - distance) / mouse.radius;
-                        const directionX = forceDirectionX * force * this.density;
-                        const directionY = forceDirectionY * force * this.density;
-                        this.x -= directionX;
-                        this.y -= directionY;
-                    }
-                }
-
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-                this.hue = (this.hue + 0.2) % 360;
-            }
-            draw() {
-                ctx.fillStyle = `hsla(${this.hue}, 70%, 60%, 0.3)`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            particles = [];
-            const numParticles = Math.floor(window.innerWidth / 15);
-            for (let i = 0; i < numParticles; i++) particles.push(new Particle());
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            particles.forEach((p, i) => {
-                p.update();
-                p.draw();
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const d = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (d < 100) {
-                        ctx.strokeStyle = `hsla(${p.hue}, 70%, 60%, ${0.15 * (1 - d/100)})`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                    }
-                }
-            });
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener('resize', () => { resize(); initParticles(); });
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.clientX;
-            mouse.y = event.clientY;
-        });        
-        resize();
-        initParticles();
-        animate();
-        // Range Slider Logic
-        const range = document.getElementById('alphaRange');
-        const rangeValue = document.getElementById('rangeValue');
+        const range = document.getElementById("alphaRange");
+        const rangeValue = document.getElementById("rangeValue");
+        const form = document.getElementById("uploadForm");
+        const loader = document.getElementById("loader");
 
         function updateRange() {
-            const val = range.value;
-            const min = range.min || 0;
-            const max = range.max || 1;
-            const percentage = ((val - min) * 100) / (max - min);
-            
-            rangeValue.textContent = val;
-            // Adjust position of the bubble to follow the thumb
-            const thumbWidth = 24;
-            const offset = thumbWidth/2 - (percentage * thumbWidth / 100);
-            rangeValue.style.left = `calc(${percentage}% + ${offset}px)`;
-            
-            // Update gradient background
-            range.style.background = `linear-gradient(to right, #818cf8 0%, #c084fc ${percentage}%, rgba(30, 41, 59, 0.8) ${percentage}%, rgba(30, 41, 59, 0.8) 100%)`;
+            if (!range || !rangeValue) return;
+
+            rangeValue.textContent =
+                Number(range.value).toFixed(1);
         }
 
-        if(range) {
-            range.addEventListener('input', updateRange);
-            updateRange(); // Init
+        if (range) {
+            range.addEventListener("input", updateRange);
+            updateRange();
         }
 
 
-    }
+        // Make the alpha control feel responsive and informative.
+        function updateBlendHint() {
+            const hint = document.getElementById("blendHint");
+            if (!range || !hint) return;
+
+            const value = Number(range.value);
+
+            if (value <= 0.2) {
+                hint.textContent = "Content-led · subtle style";
+            } else if (value <= 0.5) {
+                hint.textContent = "Balanced blend · natural transformation";
+            } else if (value <= 0.8) {
+                hint.textContent = "Style-led · expressive transformation";
+            } else {
+                hint.textContent = "Full style · maximum visual influence";
+            }
+        }
+
+        if (range) {
+            range.addEventListener("input", updateBlendHint);
+            updateBlendHint();
+        }
+
+        // Drag-and-drop image uploads.
+        ["contentPreview", "stylePreview"].forEach(function(id) {
+            const preview = document.getElementById(id);
+            if (!preview) return;
+
+            ["dragenter", "dragover"].forEach(function(eventName) {
+                preview.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    preview.classList.add("dragging");
+                });
+            });
+
+            ["dragleave", "drop"].forEach(function(eventName) {
+                preview.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    preview.classList.remove("dragging");
+                });
+            });
+        });
+
+        const contentInput = document.querySelector('input[name="content"]');
+        const styleInput = document.querySelector('input[name="style"]');
+
+        function attachDrop(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (!input || !preview) return;
+
+            preview.addEventListener("drop", function(e) {
+                const files = e.dataTransfer.files;
+                if (!files || !files.length) return;
+
+                const file = files[0];
+
+                if (!file.type.startsWith("image/")) {
+                    return;
+                }
+
+                try {
+                    const transfer = new DataTransfer();
+                    transfer.items.add(file);
+                    input.files = transfer.files;
+                    previewFile(input, previewId);
+                } catch (err) {
+                    // Browser may restrict programmatic file assignment.
+                }
+            });
+        }
+
+        attachDrop(contentInput, "contentPreview");
+        attachDrop(styleInput, "stylePreview");
+
+        // Prevent a confusing blank submission.
+        if (form) {
+            form.addEventListener("submit", function(e) {
+                const content = contentInput && contentInput.files.length;
+                const style = styleInput && styleInput.files.length;
+
+                if (!content || !style) {
+                    const firstMissing = !content ? contentInput : styleInput;
+                    if (firstMissing) {
+                        firstMissing.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+                        firstMissing.focus();
+                    }
+                    return;
+                }
+
+                loader.classList.add("active");
+            });
+        }
+
+
+        const result = document.getElementById("resultSection");
+
+        if (result) {
+            setTimeout(function() {
+                result.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }, 250);
+        }
+    });
 </script>
+
 </body>
 </html>
- 
